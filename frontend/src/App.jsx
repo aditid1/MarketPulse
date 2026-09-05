@@ -20,90 +20,107 @@ const [alerts, setAlerts] = useState([]);
 const [alertsLoading, setAlertsLoading] = useState(true);
 
   // ================= FETCH STOCKS =================
-  const fetchStocks = () => {
-    setLoading(true);
+const fetchStocks = () => {
+  setLoading(true);
 
-    fetch("http://127.0.0.1:8000/watchlist")
-      .then((response) => response.json())
-      .then((data) => {
-        const previousSnapshot = JSON.parse(
-          localStorage.getItem("marketSnapshot")
-        );
+  fetch("https://marketpulse-backend-q4wg.onrender.com/watchlist")
+    .then((response) => response.json())
+    .then((data) => {
 
-        const previousCheckTime =
-          localStorage.getItem("lastChecked");
+      // Safely get previous market snapshot
+      const storedSnapshot = localStorage.getItem("marketSnapshot");
 
-        if (previousSnapshot) {
-          const detectedChanges = data
-            .map((stock) => {
-              const previousStock = previousSnapshot.find(
-                (item) => item.symbol === stock.symbol
-              );
+      let previousSnapshot = [];
 
-              if (previousStock) {
-                const priceDifference =
-                  stock.current_price -
-                  previousStock.current_price;
+      try {
+        const parsedSnapshot = storedSnapshot
+          ? JSON.parse(storedSnapshot)
+          : [];
 
-                const percentDifference =
-                  previousStock.current_price !== 0
-                    ? (priceDifference /
-                        previousStock.current_price) *
-                      100
-                    : 0;
+        previousSnapshot = Array.isArray(parsedSnapshot)
+          ? parsedSnapshot
+          : [];
+      } catch (error) {
+        previousSnapshot = [];
+      }
 
-                return {
-                  symbol: stock.symbol,
-                  previousPrice:
-                    previousStock.current_price,
-                  currentPrice: stock.current_price,
-                  difference: priceDifference,
-                  percentDifference:
-                    percentDifference,
-                };
-              }
+      const previousCheckTime =
+        localStorage.getItem("lastChecked");
 
-              return null;
-            })
-            .filter(Boolean);
+      // Compare current data with previous snapshot
+      if (
+        Array.isArray(previousSnapshot) &&
+        previousSnapshot.length > 0
+      ) {
+        const detectedChanges = data
+          .map((stock) => {
+            const previousStock = previousSnapshot.find(
+              (item) => item.symbol === stock.symbol
+            );
 
-          setChangesSinceLastCheck(
-            detectedChanges
-          );
-        }
+            if (previousStock) {
+              const priceDifference =
+                stock.current_price -
+                previousStock.current_price;
 
-        // Save latest market snapshot
-        localStorage.setItem(
-          "marketSnapshot",
-          JSON.stringify(data)
-        );
+              const percentDifference =
+                previousStock.current_price !== 0
+                  ? (priceDifference /
+                      previousStock.current_price) *
+                    100
+                  : 0;
 
-        const currentTime =
-          new Date().toLocaleString();
+              return {
+                symbol: stock.symbol,
+                previousPrice:
+                  previousStock.current_price,
+                currentPrice: stock.current_price,
+                difference: priceDifference,
+                percentDifference:
+                  percentDifference,
+              };
+            }
 
-        localStorage.setItem(
-          "lastChecked",
-          currentTime
-        );
+            return null;
+          })
+          .filter(Boolean);
 
-        setLastChecked(previousCheckTime);
+        setChangesSinceLastCheck(detectedChanges);
+      }
 
-        setStocks(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error(
-          "Error fetching stocks:",
-          error
-        );
-        setLoading(false);
-      });
-  };
+      // Save latest market snapshot
+      localStorage.setItem(
+        "marketSnapshot",
+        JSON.stringify(data)
+      );
+
+      const currentTime =
+        new Date().toLocaleString();
+
+      localStorage.setItem(
+        "lastChecked",
+        currentTime
+      );
+
+      setLastChecked(previousCheckTime);
+
+      setStocks(data);
+      setLoading(false);
+    })
+    .catch((error) => {
+      console.error(
+        "Error fetching stocks:",
+        error
+      );
+      setLoading(false);
+    });
+};
   // ================= FETCH MARKET INSIGHTS =================
 const fetchInsights = () => {
   setInsightsLoading(true);
 
-  fetch("http://127.0.0.1:8000/insights")
+  fetch("https://marketpulse-backend-q4wg.onrender.com/insights")
+
     .then((response) => response.json())
     .then((data) => {
       setInsights(data);
@@ -120,7 +137,7 @@ const fetchInsights = () => {
 const fetchHistory = () => {
   setHistoryLoading(true);
 
-  fetch("http://127.0.0.1:8000/history")
+  fetch(" https://marketpulse-backend-q4wg.onrender.com/history")
     .then((response) => response.json())
     .then((data) => {
       setHistory(data);
@@ -135,7 +152,7 @@ const fetchHistory = () => {
 const fetchAlerts = () => {
   setAlertsLoading(true);
 
-  fetch("http://127.0.0.1:8000/alerts")
+  fetch(" https://marketpulse-backend-q4wg.onrender.com/alerts")
     .then((response) => response.json())
     .then((data) => {
       setAlerts(data.alerts || []);
@@ -155,12 +172,12 @@ const fetchAlerts = () => {
 
     setAddingStock(true);
 
-    fetch(
-      `http://127.0.0.1:8000/watchlist/${newSymbol.toUpperCase()}`,
-      {
-        method: "POST",
-      }
-    )
+   fetch(
+  `https://marketpulse-backend-q4wg.onrender.com/watchlist/${newSymbol.toUpperCase()}`,
+  {
+    method: "POST",
+  }
+)
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
@@ -193,11 +210,11 @@ const fetchAlerts = () => {
     if (!confirmRemove) return;
 
     fetch(
-      `http://127.0.0.1:8000/watchlist/${symbol}`,
-      {
-        method: "DELETE",
-      }
-    )
+  `https://marketpulse-backend-q4wg.onrender.com/watchlist/${symbol}`,
+  {
+    method: "DELETE",
+  }
+)
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {

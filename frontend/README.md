@@ -8,7 +8,7 @@ Financial markets generate large amounts of data, making it difficult for users 
 
 MarketPulse simplifies this process by monitoring selected global stocks, analyzing price changes, generating market insights, and highlighting significant movements through an alert system.
 
-## Features
+## Featurescd frontend
 
 - Real-time stock market monitoring
 - Watchlist management
